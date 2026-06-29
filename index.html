@@ -56,6 +56,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .agent-card-total { font-size: 13px; color: #1847D1; font-weight: 600; margin-top: 3px; }
 .agent-card-count { font-size: 11px; color: #888; margin-top: 2px; }
 .divider { border: none; border-top: 1px solid #F0F0F0; margin: 16px 0; }
+.lock-icon { font-size: 11px; color: #BBB; margin-top: 4px; }
 
 .offer-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .offer-tile { background: #F8F9FB; border-radius: 8px; padding: 12px 14px; }
@@ -139,15 +140,135 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
   .bcell:nth-child(2) { border-right: none; }
   .bcell:nth-child(3), .bcell:nth-child(4) { border-top: 1px solid #F0F0F0; }
 }
+
+/* Auth screen */
+#auth-screen {
+  position: fixed; inset: 0; background: #F4F5F7;
+  z-index: 100; overflow-y: auto; display: none;
+}
+.auth-inner {
+  max-width: 360px; margin: 0 auto; padding: 48px 20px 40px;
+  display: flex; flex-direction: column; align-items: center;
+}
+.auth-logo {
+  font-size: 32px; font-weight: 900; color: #1847D1;
+  letter-spacing: -1px; text-transform: uppercase;
+  -webkit-text-stroke: 2px #000; paint-order: stroke fill;
+  margin-bottom: 6px;
+}
+.auth-title { font-size: 18px; font-weight: 700; color: #1a1a1a; margin-bottom: 4px; text-align: center; }
+.auth-subtitle { font-size: 13px; color: #888; margin-bottom: 28px; text-align: center; }
+.auth-tabs { display: flex; background: white; border-radius: 10px; padding: 4px; gap: 4px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); width: 100%; }
+.auth-tab { flex: 1; padding: 9px; border: none; border-radius: 7px; font-size: 13px; font-weight: 600; cursor: pointer; background: transparent; color: #888; font-family: inherit; transition: all 0.15s; }
+.auth-tab.active { background: #1847D1; color: white; }
+.auth-field { width: 100%; margin-bottom: 14px; }
+.auth-field label { display: block; font-size: 12px; font-weight: 600; color: #555; margin-bottom: 5px; }
+.auth-field input[type=email], .auth-field select {
+  width: 100%; padding: 12px 14px; border: 1.5px solid #E0E0E0; border-radius: 10px;
+  font-size: 14px; font-family: inherit; background: white; color: #1a1a1a;
+  outline: none; transition: border-color 0.15s;
+}
+.auth-field input[type=email]:focus, .auth-field select:focus { border-color: #1847D1; }
+.auth-pin-label { font-size: 12px; font-weight: 600; color: #555; margin-bottom: 10px; }
+.auth-dots { display: flex; gap: 10px; justify-content: center; margin-bottom: 14px; }
+.auth-dot { width: 14px; height: 14px; border-radius: 50%; border: 2px solid #1847D1; background: white; transition: background 0.15s; }
+.auth-dot.filled { background: #1847D1; }
+.auth-pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 100%; max-width: 260px; margin-bottom: 6px; }
+.auth-btn { background: white; border: none; border-radius: 10px; padding: 15px; font-size: 20px; font-weight: 600; color: #1a1a1a; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.08); transition: background 0.1s, transform 0.1s; font-family: inherit; }
+.auth-btn:active { background: #E8EEFA; transform: scale(0.95); }
+.auth-btn.del { font-size: 16px; color: #888; }
+.auth-btn.empty { background: transparent; box-shadow: none; cursor: default; }
+.auth-error { font-size: 13px; color: #D85A30; font-weight: 500; min-height: 18px; text-align: center; margin-bottom: 10px; }
+.auth-submit { width: 100%; max-width: 260px; padding: 14px; background: #1847D1; color: white; border: none; border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; font-family: inherit; transition: opacity 0.15s; margin-top: 4px; }
+.auth-submit:hover { opacity: 0.9; }
+.auth-back { margin-top: 16px; background: none; border: none; font-size: 13px; color: #888; cursor: pointer; font-family: inherit; }
+.auth-back:hover { color: #1847D1; }
+.auth-sep { width: 100%; max-width: 260px; border: none; border-top: 1px solid #E8E8E8; margin: 18px 0; }
+
+/* Session badge in header */
+.session-badge { font-size: 11px; color: rgba(255,255,255,0.85); cursor: pointer; text-align: right; line-height: 1.5; }
+.session-badge:hover { color: white; }
 </style>
 </head>
 <body>
 
 <div class="fleetch-header">
   <div class="fleetch-logo">FLEETCH!</div>
-  <div class="fleetch-tagline">Meilleure flotte de VTC<br>en Côte d'Ivoire</div>
+  <div id="header-right" class="fleetch-tagline">Meilleure flotte de VTC<br>en Côte d'Ivoire</div>
 </div>
 
+<!-- Auth screen -->
+<div id="auth-screen">
+  <div class="auth-inner">
+    <div class="auth-logo">FLEETCH!</div>
+    <div class="auth-title" id="auth-agent-name"></div>
+    <div class="auth-subtitle" id="auth-subtitle-txt"></div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tab-login" onclick="switchTab('login')">Connexion</button>
+      <button class="auth-tab" id="tab-register" onclick="switchTab('register')">Créer un compte</button>
+    </div>
+
+    <!-- Login -->
+    <div id="panel-login" style="width:100%;display:flex;flex-direction:column;align-items:center;">
+      <div class="auth-field" style="max-width:260px;width:100%;">
+        <label>Adresse e-mail</label>
+        <input type="email" id="login-email" placeholder="ton@email.com" autocomplete="email">
+      </div>
+      <div class="auth-pin-label">Code PIN à 4 chiffres</div>
+      <div class="auth-dots" id="login-dots">
+        <div class="auth-dot" id="ld-0"></div><div class="auth-dot" id="ld-1"></div>
+        <div class="auth-dot" id="ld-2"></div><div class="auth-dot" id="ld-3"></div>
+      </div>
+      <div class="auth-pad">
+        <button class="auth-btn" onclick="authPin('login','1')">1</button>
+        <button class="auth-btn" onclick="authPin('login','2')">2</button>
+        <button class="auth-btn" onclick="authPin('login','3')">3</button>
+        <button class="auth-btn" onclick="authPin('login','4')">4</button>
+        <button class="auth-btn" onclick="authPin('login','5')">5</button>
+        <button class="auth-btn" onclick="authPin('login','6')">6</button>
+        <button class="auth-btn" onclick="authPin('login','7')">7</button>
+        <button class="auth-btn" onclick="authPin('login','8')">8</button>
+        <button class="auth-btn" onclick="authPin('login','9')">9</button>
+        <button class="auth-btn empty"></button>
+        <button class="auth-btn" onclick="authPin('login','0')">0</button>
+        <button class="auth-btn del" onclick="authDel('login')">⌫</button>
+      </div>
+      <div class="auth-error" id="login-error"></div>
+      <button class="auth-submit" onclick="doLogin()">Se connecter</button>
+    </div>
+
+    <!-- Register -->
+    <div id="panel-register" style="width:100%;display:none;flex-direction:column;align-items:center;">
+      <div class="auth-field" style="max-width:260px;width:100%;">
+        <label>Adresse e-mail</label>
+        <input type="email" id="reg-email" placeholder="ton@email.com" autocomplete="email">
+      </div>
+      <div class="auth-pin-label">Choisis ton code PIN à 4 chiffres</div>
+      <div class="auth-dots" id="reg-dots">
+        <div class="auth-dot" id="rd-0"></div><div class="auth-dot" id="rd-1"></div>
+        <div class="auth-dot" id="rd-2"></div><div class="auth-dot" id="rd-3"></div>
+      </div>
+      <div class="auth-pad">
+        <button class="auth-btn" onclick="authPin('reg','1')">1</button>
+        <button class="auth-btn" onclick="authPin('reg','2')">2</button>
+        <button class="auth-btn" onclick="authPin('reg','3')">3</button>
+        <button class="auth-btn" onclick="authPin('reg','4')">4</button>
+        <button class="auth-btn" onclick="authPin('reg','5')">5</button>
+        <button class="auth-btn" onclick="authPin('reg','6')">6</button>
+        <button class="auth-btn" onclick="authPin('reg','7')">7</button>
+        <button class="auth-btn" onclick="authPin('reg','8')">8</button>
+        <button class="auth-btn" onclick="authPin('reg','9')">9</button>
+        <button class="auth-btn empty"></button>
+        <button class="auth-btn" onclick="authPin('reg','0')">0</button>
+        <button class="auth-btn del" onclick="authDel('reg')">⌫</button>
+      </div>
+      <div class="auth-error" id="reg-error"></div>
+      <button class="auth-submit" onclick="doRegister()">Créer mon compte</button>
+    </div>
+
+    <button class="auth-back" onclick="closeAuthScreen()">← Retour</button>
+  </div>
+</div>
 
 <div class="content">
   <div id="home-screen">
@@ -311,6 +432,115 @@ const DEMO_AGENTS = [
 
 let sheetData = [], realAgents = [], currentMonth = '';
 
+// ── Auth system ──────────────────────────────────────────────────────────
+// Storage key: fleetch_accounts = { agentName: { email, pin } }
+// Storage key: fleetch_session = { agentName, type, idx }
+let authTarget = null; // { name, type, idx }
+let loginPin = '', regPin = '';
+
+function getAccounts() {
+  try { return JSON.parse(localStorage.getItem('fleetch_accounts') || '{}'); } catch { return {}; }
+}
+function saveAccounts(obj) { localStorage.setItem('fleetch_accounts', JSON.stringify(obj)); }
+function getSession() {
+  try { return JSON.parse(localStorage.getItem('fleetch_session') || 'null'); } catch { return null; }
+}
+function saveSession(s) { localStorage.setItem('fleetch_session', JSON.stringify(s)); }
+function clearSession() { localStorage.removeItem('fleetch_session'); }
+
+function openAuthScreen(type, idx) {
+  const ag = type === 'real' ? realAgents[idx] : DEMO_AGENTS[idx];
+  authTarget = { name: ag.name, type, idx };
+  loginPin = ''; regPin = '';
+  document.getElementById('auth-agent-name').textContent = ag.name;
+  const accounts = getAccounts();
+  const hasAccount = !!accounts[ag.name];
+  document.getElementById('auth-subtitle-txt').textContent = hasAccount
+    ? 'Connecte-toi pour accéder à ton tableau de bord'
+    : 'Crée ton compte pour sécuriser l\'accès à ton profil';
+  switchTab(hasAccount ? 'login' : 'register');
+  updateAuthDots('login'); updateAuthDots('reg');
+  document.getElementById('login-error').textContent = '';
+  document.getElementById('reg-error').textContent = '';
+  document.getElementById('login-email').value = hasAccount ? (accounts[ag.name].email || '') : '';
+  document.getElementById('reg-email').value = '';
+  document.getElementById('auth-screen').style.display = 'block';
+  window.scrollTo(0, 0);
+}
+function closeAuthScreen() {
+  document.getElementById('auth-screen').style.display = 'none';
+  authTarget = null; loginPin = ''; regPin = '';
+}
+function switchTab(tab) {
+  document.getElementById('tab-login').classList.toggle('active', tab === 'login');
+  document.getElementById('tab-register').classList.toggle('active', tab === 'register');
+  document.getElementById('panel-login').style.display = tab === 'login' ? 'flex' : 'none';
+  document.getElementById('panel-register').style.display = tab === 'register' ? 'flex' : 'none';
+}
+function authPin(mode, digit) {
+  if (mode === 'login') {
+    if (loginPin.length >= 4) return;
+    loginPin += digit;
+    updateAuthDots('login');
+  } else {
+    if (regPin.length >= 4) return;
+    regPin += digit;
+    updateAuthDots('reg');
+  }
+}
+function authDel(mode) {
+  if (mode === 'login') { loginPin = loginPin.slice(0,-1); updateAuthDots('login'); document.getElementById('login-error').textContent=''; }
+  else { regPin = regPin.slice(0,-1); updateAuthDots('reg'); document.getElementById('reg-error').textContent=''; }
+}
+function updateAuthDots(mode) {
+  const val = mode === 'login' ? loginPin : regPin;
+  const prefix = mode === 'login' ? 'ld' : 'rd';
+  for (let i = 0; i < 4; i++) {
+    document.getElementById(`${prefix}-${i}`).classList.toggle('filled', i < val.length);
+  }
+}
+function doLogin() {
+  const email = document.getElementById('login-email').value.trim().toLowerCase();
+  const errEl = document.getElementById('login-error');
+  if (!email) { errEl.textContent = 'Entre ton adresse e-mail'; return; }
+  if (loginPin.length < 4) { errEl.textContent = 'Entre ton code PIN à 4 chiffres'; return; }
+  const accounts = getAccounts();
+  const acc = accounts[authTarget.name];
+  if (!acc) { errEl.textContent = 'Aucun compte trouvé, crée-en un d\'abord'; return; }
+  if (acc.email !== email || acc.pin !== loginPin) { errEl.textContent = 'E-mail ou PIN incorrect'; loginPin=''; updateAuthDots('login'); return; }
+  saveSession({ agentName: authTarget.name, type: authTarget.type, idx: authTarget.idx });
+  closeAuthScreen();
+  updateHeaderSession(authTarget.name);
+  showAgent(authTarget.type, authTarget.idx);
+}
+function doRegister() {
+  const email = document.getElementById('reg-email').value.trim().toLowerCase();
+  const errEl = document.getElementById('reg-error');
+  if (!email || !email.includes('@')) { errEl.textContent = 'Entre une adresse e-mail valide'; return; }
+  if (regPin.length < 4) { errEl.textContent = 'Choisis un code PIN à 4 chiffres'; return; }
+  const accounts = getAccounts();
+  if (accounts[authTarget.name]) { errEl.textContent = 'Un compte existe déjà, utilise la connexion'; return; }
+  accounts[authTarget.name] = { email, pin: regPin };
+  saveAccounts(accounts);
+  saveSession({ agentName: authTarget.name, type: authTarget.type, idx: authTarget.idx });
+  closeAuthScreen();
+  updateHeaderSession(authTarget.name);
+  showAgent(authTarget.type, authTarget.idx);
+}
+function updateHeaderSession(name) {
+  const el = document.getElementById('header-right');
+  if (name) {
+    el.className = 'session-badge';
+    el.innerHTML = `Connecté : <strong>${name}</strong><br><span style="font-size:10px;">Se déconnecter</span>`;
+    el.onclick = () => { clearSession(); updateHeaderSession(null); document.getElementById('agent-screen').style.display='none'; document.getElementById('home-screen').style.display='block'; window.scrollTo(0,0); };
+  } else {
+    el.className = 'fleetch-tagline';
+    el.innerHTML = 'Meilleure flotte de VTC<br>en Côte d\'Ivoire';
+    el.onclick = null;
+  }
+}
+// ─────────────────────────────────────────────────────────────────────────
+
 function getInitials(n) {
   if (!n) return '?';
   const p = n.trim().split(/\s+/);
@@ -383,31 +613,36 @@ function renderHome() {
   let html = `<span class="month-pill">Soit le meilleur agent !</span>`;
   html += `<div class="section-label" style="margin-top:14px;">Choisir ton profil</div><div class="agent-grid">`;
 
-  // Vrais agents — clic direct
+  // Vrais agents
   realAgents.forEach((ag, i) => {
     const cnt = sheetData.filter(r => getCol(r,'AGENT').trim() === ag.name).length;
-    html += `<div class="agent-card" onclick="showAgent('real', ${i})">
+    const accounts = getAccounts();
+    const hasAcc = !!accounts[ag.name];
+    html += `<div class="agent-card" onclick="openAuthScreen('real', ${i})">
       <div class="agent-av">${getInitials(ag.name)}</div>
       <div class="agent-card-name">${ag.name}</div>
       <div class="agent-card-total">— F</div>
       <div class="agent-card-count">${cnt} chauffeur${cnt!==1?'s':''}</div>
+      <div class="lock-icon">${hasAcc ? '🔓' : '🔒'}</div>
     </div>`;
   });
 
-  // Faux agents — clic direct
+  // Faux agents
   const DEMO_COUNTS = {
     'Scout Yao':47,'Scout Aminata':63,'Scout Mariam':51,'Scout Jean-Marc':58,
     'Scout Fatoumata':72,'Scout Mamadou':34,'Scout Ibrahima':89,'Scout Salimata':121,
     'Scout Patrick':66,'Scout Kadiatou':93
   };
   DEMO_AGENTS.forEach((ag, i) => {
-    const tot = getDemoTotal(ag);
     const cnt = DEMO_COUNTS[ag.name] || ag.drivers.length;
-    html += `<div class="agent-card" onclick="showAgent('demo', ${i})">
+    const accounts = getAccounts();
+    const hasAcc = !!accounts[ag.name];
+    html += `<div class="agent-card" onclick="openAuthScreen('demo', ${i})">
       <div class="agent-av">${getInitials(ag.name)}</div>
       <div class="agent-card-name">${ag.name}</div>
       <div class="agent-card-total">— F</div>
       <div class="agent-card-count">${cnt} chauffeurs</div>
+      <div class="lock-icon">${hasAcc ? '🔓' : '🔒'}</div>
     </div>`;
   });
 
@@ -627,7 +862,25 @@ async function doRefresh(btn) {
 }
 
 (async () => {
-  try { await loadData(); renderHome(); }
+  try {
+    await loadData();
+    renderHome();
+    // Restore session if still valid
+    const session = getSession();
+    if (session) {
+      const allAgents = [
+        ...realAgents.map((ag, i) => ({ ...ag, type: 'real', idx: i })),
+        ...DEMO_AGENTS.map((ag, i) => ({ ...ag, type: 'demo', idx: i }))
+      ];
+      const found = allAgents.find(a => a.name === session.agentName && a.type === session.type);
+      if (found) {
+        updateHeaderSession(session.agentName);
+        showAgent(session.type, session.idx);
+      } else {
+        clearSession();
+      }
+    }
+  }
   catch(e) {
     document.getElementById('home-body').innerHTML = `
       <div class="error-box"><strong>Erreur de chargement</strong><br>${e.message}<br><br>
