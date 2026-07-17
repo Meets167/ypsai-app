@@ -55,6 +55,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .agent-card-name { font-size: 14px; font-weight: 600; color: #1a1a1a; }
 .agent-card-total { font-size: 13px; color: #1847D1; font-weight: 600; margin-top: 3px; }
 .agent-card-count { font-size: 11px; color: #888; margin-top: 2px; }
+
 .divider { border: none; border-top: 1px solid #F0F0F0; margin: 16px 0; }
 
 .offer-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
@@ -139,7 +140,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
   .bcell:nth-child(2) { border-right: none; }
   .bcell:nth-child(3), .bcell:nth-child(4) { border-top: 1px solid #F0F0F0; }
 }
-
+</style>
 </head>
 <body>
 
@@ -147,7 +148,6 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
   <div class="fleetch-logo">FLEETCH!</div>
   <div class="fleetch-tagline">Meilleure flotte de VTC<br>en Côte d'Ivoire</div>
 </div>
-
 
 <div class="content">
   <div id="home-screen">
@@ -170,7 +170,6 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 
 <script>
 const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQAAWDvf1mtml-i0tTIkwJEwI4m6cxSInXYJDd_9U-hpGaDYXKvzWpMzb6lJ9Xh0NJ7aDvIu8Pk2Ub0/pub?gid=0&single=true&output=csv';
-
 
 const DEMO_AGENTS = [
   {
@@ -311,7 +310,6 @@ const DEMO_AGENTS = [
 
 let sheetData = [], realAgents = [], currentMonth = '';
 
-
 function getInitials(n) {
   if (!n) return '?';
   const p = n.trim().split(/\s+/);
@@ -378,7 +376,6 @@ function getRealTotal(name) {
   });
   return t;
 }
-
 
 function renderHome() {
   let html = `<span class="month-pill">Soit le meilleur agent !</span>`;
@@ -627,10 +624,7 @@ async function doRefresh(btn) {
 }
 
 (async () => {
-  try {
-    await loadData();
-    renderHome();
-  }
+  try { await loadData(); renderHome(); }
   catch(e) {
     document.getElementById('home-body').innerHTML = `
       <div class="error-box"><strong>Erreur de chargement</strong><br>${e.message}<br><br>
