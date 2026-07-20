@@ -349,6 +349,15 @@ function getCol(row, ...keys) {
   }
   return '';
 }
+function debugCols() {
+  if (!sheetData.length) return;
+  const row = sheetData[0];
+  const cols = Object.keys(row);
+  console.log('=== COLONNES DISPONIBLES ===');
+  cols.forEach((c, i) => console.log(`[${i}] "${c}" = "${row[c]}"`));
+  console.log('AD =', row['Nombre de chauffeurs enregistrés']);
+  console.log('AE =', row['Nombre de chauffeurs activés']);
+}
 function isFirstWeek(val) {
   const v = (val||'').toUpperCase().trim();
   return v==='OUI'||v==='YES'||v==='TRUE'||v==='1';
@@ -358,6 +367,7 @@ async function loadData() {
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   const text = await res.text();
   sheetData = parseCSV(text);
+  debugCols();
   const seen = new Set();
   realAgents = [];
   sheetData.forEach(row => {
