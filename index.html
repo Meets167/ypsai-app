@@ -172,6 +172,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 
 <script>
 const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQAAWDvf1mtml-i0tTIkwJEwI4m6cxSInXYJDd_9U-hpGaDYXKvzWpMzb6lJ9Xh0NJ7aDvIu8Pk2Ub0/pub?gid=0&single=true&output=csv';
+const PROXY = 'https://corsproxy.io/?url=';
 
 const DEMO_AGENTS = [
   {
@@ -363,8 +364,8 @@ function isFirstWeek(val) {
   return v==='OUI'||v==='YES'||v==='TRUE'||v==='1';
 }
 async function loadData() {
-  const res = await fetch(CSV_URL);
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  let res = await fetch(PROXY + encodeURIComponent(CSV_URL));
+  if (!res.ok) res = await fetch(CSV_URL); // fallback direct
   const text = await res.text();
   sheetData = parseCSV(text);
   debugCols();
