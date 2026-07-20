@@ -117,8 +117,10 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
 .week-strip { background: #FFFBF0; border-top: 1px solid #FAC775; padding: 9px 14px; }
 .week-title { font-size: 11px; color: #854F0B; font-weight: 600; margin-bottom: 5px; }
 .week-items { display: flex; gap: 20px; flex-wrap: wrap; }
-.week-item { font-size: 12px; color: #633806; }
+.week-item { font-size: 12px; color: #633806; border-radius: 6px; padding: 3px 8px; }
 .week-item strong { font-weight: 600; }
+.week-item.week-ok   { color: #1A7A4A; background: #E6F7EE; }
+.week-item.week-warn { color: #B35A00; background: #FFF3E0; }
 
 .bonus-strip { display: grid; grid-template-columns: repeat(4,1fr); border-top: 1px solid #F0F0F0; }
 .bcell { padding: 8px; text-align: center; border-right: 1px solid #F0F0F0; }
@@ -553,6 +555,8 @@ function showAgent(type, idx) {
         restPerf:getCol(d,'Nombre de courses restant pour bonus performance')||'0',
         bActiv:parseFloat(getCol(d,'Bonus Activation'))||0,
         bS1:parseFloat(getCol(d,'Bonus 1ere semaine'))||0,
+        nbEnregistres:parseInt(getCol(d,'Nombre de chauffeurs enregistrés'))||0,
+        nbActives:parseInt(getCol(d,'Nombre de chauffeurs activés'))||0,
         bMaintien:parseFloat(getCol(d,'Bonus Maintien'))||0,
         bBoost:parseFloat(getCol(d,'Bonus Maintien boosté'))||0,
       }));
@@ -570,19 +574,40 @@ function renderDriverCard(list, d) {
   const isTodo = d.todo && d.todo.toLowerCase()!=='non' && d.todo!=='';
   const lastN = parseInt(d.lastCourse)||0;
   const inactifTag = lastN > 3 ? `<span class="inactif-tag">${d.lastCourse}j sans course</span>` : '';
+  // Bonus 1ère semaine : statut selon valeur U
+  const bS1Val = d.bS1;
+  let bS1Label = '', bS1Color = '';
+  if (bS1Val >= 30000)      { bS1Label = '✓ Bonus complet (30 000 F)';      bS1Color = 'on'; }
+  else if (bS1Val >= 20000) { bS1Label = '✓ Bonus activation (20 000 F)';   bS1Color = 'on'; }
+  else if (bS1Val >= 10000) { bS1Label = '✓ Bonus enregistrement (10 000 F)'; bS1Color = 'on'; }
+  else                       { bS1Label = 'Pas de bonus 1ère semaine';         bS1Color = 'off'; }
+
+  // Suivi si 1ère semaine en cours (AC = OUI)
+  const regOk  = d.nbEnregistres >= 10;
+  const activOk = d.nbActives >= 5;
   const weekHtml = d.fw ? `<div class="week-strip">
-    <div class="week-title">1ère semaine en cours</div>
+    <div class="week-title">🗓 1ère semaine en cours</div>
     <div class="week-items">
-      <span class="week-item"><strong>${d.coursesS1}</strong> courses faites</span>
-      <span class="week-item"><strong>${d.restPerf}</strong> restantes pour bonus perf.</span>
+      <span class="week-item ${regOk?'week-ok':'week-warn'}">
+        <strong>${d.nbEnregistres}/10</strong> enregistrés ${regOk?'✓':''}
+      </span>
+      <span class="week-item ${activOk?'week-ok':'week-warn'}">
+        <strong>${d.nbActives}/5</strong> activés ${activOk?'✓':''}
+      </span>
+    </div>
+    <div style="font-size:11px;margin-top:6px;color:#888;">
+      ${regOk && activOk ? '🎯 Conditions remplies pour toucher le bonus' : 'Conditions pas encore remplies'}
     </div>
   </div>` : '';
+
   const bonusHtml = hasBonuses ? `<div class="bonus-strip">
     <div class="bcell"><div class="bcell-l">Activation</div><div class="bcell-v ${d.bActiv>0?'on':'off'}">${fmtF(d.bActiv)}</div></div>
-    <div class="bcell"><div class="bcell-l">1ère sem.</div><div class="bcell-v ${d.bS1>0?'on':'off'}">${fmtF(d.bS1)}</div></div>
+    <div class="bcell"><div class="bcell-l">1ère sem.</div><div class="bcell-v ${bS1Color}">${bS1Val>0?fmtF(bS1Val):'—'}</div></div>
     <div class="bcell"><div class="bcell-l">Maintien</div><div class="bcell-v ${d.bMaintien>0?'on':'off'}">${fmtF(d.bMaintien)}</div></div>
     <div class="bcell"><div class="bcell-l">Boosté</div><div class="bcell-v ${d.bBoost>0?'on':'off'}">${fmtF(d.bBoost)}</div></div>
-  </div>` : '';
+  </div>` : bS1Val === 0 && !d.fw ? '' : `<div class="bonus-strip">
+    <div class="bcell" style="grid-column:1/-1"><div class="bcell-l">1ère sem.</div><div class="bcell-v ${bS1Color}">${bS1Label}</div></div>
+  </div>`;
   const el = document.createElement('div');
   el.className = 'dcard';
   el.innerHTML = `
